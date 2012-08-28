@@ -1,0 +1,175 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<jdevws:WebService xmlns:jdevws="http://xmlns.oracle.com/jdeveloper/10130/webservice">
+   <list n="CHILD_NODES">
+      <url path="../../../public_html/WEB-INF/wsdl/eventService.wsdl"/>
+      <url path="types/ExtractionSubsequentNotify.java"/>
+      <url path="types/PolicyAssertionChanged.java"/>
+      <url path="types/CategorizationStatusChanged.java"/>
+      <url path="types/AssetUnregistered.java"/>
+      <url path="types/User.java"/>
+      <url path="types/AssetUnaccepted.java"/>
+      <url path="types/ExtractionReassign.java"/>
+      <url path="types/ComplianceTemplateApplied.java"/>
+      <url path="types/package-info.java"/>
+      <url path="types/AssetUnsubmitted.java"/>
+      <url path="types/MetaDataChanged.java"/>
+      <url path="types/InstanceStatusEnumeration.java"/>
+      <url path="types/AssetTabApproved.java"/>
+      <url path="types/EventInfo.java"/>
+      <url path="types/AssetAssign.java"/>
+      <url path="types/AssetAccepted.java"/>
+      <url path="types/AssetUnassign.java"/>
+      <url path="types/AssetAllTabApproved.java"/>
+      <url path="types/MultiUseParam.java"/>
+      <url path="types/AssetTabUnApprove.java"/>
+      <url path="types/AssetSubmissionRejected.java"/>
+      <url path="types/MultiUse.java"/>
+      <url path="types/EventSource.java"/>
+      <url path="types/AssetStatusChanged.java"/>
+      <url path="types/AssetSubmission.java"/>
+      <url path="types/RegistrationStatusChanged.java"/>
+      <url path="types/ExtendedData.java"/>
+      <url path="types/Event.java"/>
+      <url path="types/Asset.java"/>
+      <url path="types/ExtractionIntialNotify.java"/>
+      <url path="types/RelatedAssetRegister.java"/>
+      <url path="types/ObjectFactory.java"/>
+      <url path="types/AssetRegistered.java"/>
+      <url path="types/NewVersionRegistered.java"/>
+      <url path="types/ALERExtendedData.java"/>
+      <url path="types/Extraction.java"/>
+      <url path="types/Relationship.java"/>
+      <url path="types/ExtractionStatusChanged.java"/>
+      <url path="EventPortTypeImpl.java"/>
+   </list>
+   <hash n="DATA_MODEL">
+      <value n="ATTACHMENT_ENCODING" v="MTOM"/>
+      <list n="BD_">
+         <hash>
+            <value n="BD_DEFAULT_DOCUMENT_WRAPPED" v="false"/>
+            <value n="BOUND_PORT_TYPE" v="{USE_OWNER_TNS}eventPortType"/>
+            <value n="DEFAULT_NAME" v="false"/>
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPBinding"/>
+            <value n="NAME" v="{http://www.bea.com/aler/events/eventsListenerWsdl/}EventServiceBinding"/>
+            <list n="OP_BINDINGS">
+               <hash>
+                  <value n="BD_DOCUMENT_WRAPPED" v="false"/>
+                  <value n="BD_RESPONSE_PART" v="status"/>
+                  <value n="BD_SOAP_ACTION" v="http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponse"/>
+                  <value n="BD_WSDL_RETURN_NAME" v="StringVal"/>
+                  <value n="BD_WSDL_RETURN_TNS" v="http://www.bea.com/infra/events"/>
+                  <value n="BOUND_OPERATION" v="java.lang.String.newEventRequestResponse.com.example.types.Event"/>
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPOperationBinding"/>
+                  <hash n="PROPERTY_GROUPS"/>
+               </hash>
+               <hash>
+                  <value n="BD_DOCUMENT_WRAPPED" v="false"/>
+                  <value n="BD_RESPONSE_PART" v="status"/>
+                  <value n="BD_SOAP_ACTION" v="http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponseString"/>
+                  <value n="BD_WSDL_RETURN_NAME" v="StringVal"/>
+                  <value n="BD_WSDL_RETURN_TNS" v="http://www.bea.com/infra/events"/>
+                  <value n="BOUND_OPERATION" v="java.lang.String.newEventRequestResponseString.java.lang.String"/>
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPOperationBinding"/>
+                  <hash n="PROPERTY_GROUPS"/>
+               </hash>
+            </list>
+            <hash n="PROPERTY_GROUPS"/>
+         </hash>
+      </list>
+      <list n="BINDING_FILES"/>
+      <value n="GENERATION_OPTION" v="ANNOTATIONS_WSDL"/>
+      <value n="GUID" v="6f2b59f0-0139-1000-8007-7f000001aac9"/>
+      <list n="LOCAL_FILES"/>
+      <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaWebService"/>
+      <list n="PO_">
+         <hash>
+            <value n="DEFAULT_NAME" v="true"/>
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPPort"/>
+            <value n="NAME" v="EventServiceBindingPort"/>
+            <value n="PORT_BINDING_NAME" v="{http://www.bea.com/aler/events/eventsListenerWsdl/}EventServiceBinding"/>
+            <list n="PORT_OPS">
+               <hash>
+                  <value n="EXPOSED_BD_OPERATION" v="java.lang.String.newEventRequestResponse.com.example.types.Event"/>
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.PortOperation"/>
+                  <hash n="PROPERTY_GROUPS"/>
+               </hash>
+               <hash>
+                  <value n="EXPOSED_BD_OPERATION" v="java.lang.String.newEventRequestResponseString.java.lang.String"/>
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.PortOperation"/>
+                  <hash n="PROPERTY_GROUPS"/>
+               </hash>
+            </list>
+            <hash n="PROPERTY_GROUPS"/>
+            <url n="URL" protocol="http" host="localhost" port="7001" path="/OEREventHandler-EventHandler-context-root/EventServiceBindingPort"/>
+         </hash>
+      </list>
+      <hash n="PROPERTY_GROUPS">
+         <hash n="WSDL_TO_JAVA_PROPERTIES">
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.WSDLToJavaProperties"/>
+            <value n="WSDL2JAVA_DEFAULT_PACKAGE" v="com.example"/>
+            <value n="WSDL2JAVA_ROOT_VALUE_PACKAGE" v="com.example.types"/>
+            <value n="WSDL2JAVA_UNWRAP_PARAMETERS" v="false"/>
+         </hash>
+      </hash>
+      <list n="PT_">
+         <hash>
+            <value n="AUTO_SERVICE_INTERFACE"/>
+            <value n="DEFAULT_NAME" v="false"/>
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaPortType"/>
+            <value n="NAME" v="{USE_OWNER_TNS}eventPortType"/>
+            <list n="OP_">
+               <hash>
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaOperation"/>
+                  <value n="OP_JAVA_NAME" v="newEventRequestResponse"/>
+                  <list n="OP_JAVA_PARAMETERS">
+                     <hash>
+                        <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaParameter"/>
+                        <value n="NAME" v="event"/>
+                        <value n="PA_MODE" v="0"/>
+                        <value n="PA_WSDL_NAME" v="newEventRequestResponse"/>
+                        <value n="PA_WSDL_PART_NAME" v="event"/>
+                        <value n="TARGET_NAMESPACE" v="http://www.bea.com/infra/events"/>
+                        <value n="TYPE" v="com.example.types.Event"/>
+                     </hash>
+                  </list>
+                  <value n="OP_JAVA_RETURN_TYPE" v="java.lang.String"/>
+                  <value n="OP_NAME" v="newEventRequestResponse"/>
+                  <hash n="PROPERTY_GROUPS"/>
+               </hash>
+               <hash>
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaOperation"/>
+                  <value n="OP_JAVA_NAME" v="newEventRequestResponseString"/>
+                  <list n="OP_JAVA_PARAMETERS">
+                     <hash>
+                        <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaParameter"/>
+                        <value n="NAME" v="event"/>
+                        <value n="PA_MODE" v="0"/>
+                        <value n="PA_WSDL_NAME" v="newEventRequestResponseString"/>
+                        <value n="PA_WSDL_PART_NAME" v="event"/>
+                        <value n="TARGET_NAMESPACE" v="http://www.bea.com/infra/events"/>
+                        <value n="TYPE" v="java.lang.String"/>
+                     </hash>
+                  </list>
+                  <value n="OP_JAVA_RETURN_TYPE" v="java.lang.String"/>
+                  <value n="OP_NAME" v="newEventRequestResponseString"/>
+                  <hash n="PROPERTY_GROUPS"/>
+               </hash>
+            </list>
+            <hash n="PROPERTY_GROUPS"/>
+            <value n="PT_CLASS" v="com.example.EventPortTypeImpl"/>
+         </hash>
+      </list>
+      <value n="SERVICE_ASYNC" v="false"/>
+      <url n="TARGET_PROJECT" path="../../../OEREventService.jpr"/>
+      <value n="TOPDOWN_GENERATION_OPTION" v="JAVA"/>
+      <list n="WS_DEPENDENT_VALUE_TYPES"/>
+      <value n="WS_ORIG_GEN_DIRECTION" v="TOP_DOWN"/>
+      <url n="WS_REFERENCE_WSDL" path="../../../public_html/WEB-INF/wsdl/eventService.wsdl"/>
+      <value n="WS_TARGET_NAMESPACE" v="http://www.bea.com/aler/events/eventsListenerWsdl/"/>
+      <value n="WS_URI" v="eventService"/>
+      <url n="WS_WSDL_FILE" path="../../../public_html/WEB-INF/wsdl/eventService.wsdl"/>
+      <value n="WS_WSDL_LOC_ON_SEI" v="false"/>
+      <value n="WS_WSDL_LOC_VALUE" v="/WEB-INF/wsdl/eventService.wsdl"/>
+      <value n="WS_WSDL_LOCATION" v="/home/oracle/jdeveloper/mywork/OEREvents/OEREventService/public_html/WEB-INF/wsdl/"/>
+   </hash>
+</jdevws:WebService>

@@ -1,0 +1,474 @@
+<wsdl:definitions
+     name="eventsListener"
+     targetNamespace="http://www.bea.com/aler/events/eventsListenerWsdl/"
+     xmlns:ns1="http://schemas.xmlsoap.org/soap/encoding/"
+     xmlns:ns="http://www.bea.com/infra/events"
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:tns="http://www.bea.com/aler/events/eventsListenerWsdl/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+     xmlns:aler="http://www.bea.com/aler/events"
+    >
+    <wsdl:types>
+        <xs:schema targetNamespace="http://www.bea.com/infra/events" xmlns:commonEvents="http://www.bea.com/infra/events"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2001/XMLSchema"
+             elementFormDefault="qualified" attributeFormDefault="unqualified">
+            <xs:annotation>
+                <xs:documentation>Defines the common events structure</xs:documentation>
+            </xs:annotation>
+            <xs:element name="newEventRequest" type="commonEvents:Event"/>
+            <xs:element name="newEventRequestResponse" type="commonEvents:Event"/>
+            <xs:element name="newEventRequestString" type="xs:string"/>
+            <xs:element name="newEventRequestResponseString" type="xs:string"/>
+            <xs:element name="Event" type="commonEvents:Event"/>
+            <xs:element name="StringVal" type="xs:string"/>
+            <xs:complexType name="Event">
+                <xs:sequence>
+                    <xs:element name="eventData" type="commonEvents:EventInfo" minOccurs="1" maxOccurs="1"/>
+                    <xs:element name="eventSource" type="commonEvents:EventSource" minOccurs="1" maxOccurs="1"/>
+                    <xs:element ref="commonEvents:ExtendedData" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="EventInfo">
+                <xs:sequence>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="eventId" type="xs:string"/>
+                    <xs:element name="description" type="xs:string"/>
+                    <xs:element name="version" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="EventSource">
+                <xs:sequence>
+                    <xs:element name="location" type="xs:string"/>
+                    <xs:element name="componentName" type="xs:string"/>
+                    <xs:element name="componentType" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="ExtendedData" type="commonEvents:ExtendedData" abstract="true"/>
+            <xs:complexType name="ExtendedData" abstract="true"/>
+        </xs:schema>
+        <xs:schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:alerEvents="http://www.bea.com/aler/events"
+             xmlns:commonEvents="http://www.bea.com/infra/events" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+             attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.bea.com/aler/events">
+            <xs:annotation>
+                <xs:documentation>Defines the ALER events elements</xs:documentation>
+            </xs:annotation>
+            <xs:element name="ALERExtendedData" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:ALERExtendedData"/>
+            <xs:complexType name="ALERExtendedData">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="asset" type="alerEvents:Asset"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="registrarEmail" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="updatedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetTabApproved" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetTabApproved"/>
+            <xs:complexType name="AssetTabApproved">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="tabName" type="xs:string"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetAllTabApproved" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:AssetAllTabApproved"/>
+            <xs:complexType name="AssetAllTabApproved">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence/>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetAccepted" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetAccepted"/>
+            <xs:complexType name="AssetAccepted">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="submittedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetAssign" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetAssign"/>
+            <xs:complexType name="AssetAssign">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="assignedTo" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetRegistered" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetRegistered"/>
+            <xs:complexType name="AssetRegistered">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="submittedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetSubmissionRejected" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:AssetSubmissionRejected"/>
+            <xs:complexType name="AssetSubmissionRejected">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="submittedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetTabUnApprove" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetTabUnApprove"/>
+            <xs:complexType name="AssetTabUnApprove">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="tabName" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="assignedTo" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetUnaccepted" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetUnaccepted"/>
+            <xs:complexType name="AssetUnaccepted">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="submittedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetUnassign" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetUnassign"/>
+            <xs:complexType name="AssetUnassign">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="unassignedTo" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetUnregistered" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetUnregistered"/>
+            <xs:complexType name="AssetUnregistered">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="asset" type="alerEvents:Asset"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="registrarEmail" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="updatedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetUnsubmitted" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetUnsubmitted"/>
+            <xs:complexType name="AssetUnsubmitted">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="submittedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="ComplianceTemplateApplied" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:ComplianceTemplateApplied"/>
+            <xs:complexType name="ComplianceTemplateApplied">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="projectId" type="xs:long"/>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="projectLeaders" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="NewVersionRegistered" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:NewVersionRegistered"/>
+            <xs:complexType name="NewVersionRegistered">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="newAsset" type="alerEvents:Asset"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetStatusChanged" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetStatusChanged"/>
+            <xs:complexType name="AssetStatusChanged">
+                <complexContent>
+                    <extension base="alerEvents:ALERExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="comment" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="submittedBy" type="alerEvents:User"/>
+                            <xs:element maxOccurs="unbounded" minOccurs="1" name="parameters" type="alerEvents:MultiUseParam"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="AssetSubmission" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:AssetSubmission"/>
+            <xs:complexType name="AssetSubmission">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="asset" type="alerEvents:Asset"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="registrarEmail" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="0" name="source" type="xs:string"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="submittedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="ExtractionIntialNotify" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:ExtractionIntialNotify"/>
+            <xs:complexType name="ExtractionIntialNotify">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="extraction" type="alerEvents:Extraction"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="ExtractionReassign" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:ExtractionReassign"/>
+            <xs:complexType name="ExtractionReassign">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="extraction" type="alerEvents:Extraction"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="reassignedTo" type="alerEvents:User"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="invokedBy" type="alerEvents:User"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="comment" type="xs:string"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="ExtractionStatusChanged" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:ExtractionStatusChanged"/>
+            <xs:complexType name="ExtractionStatusChanged">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="extraction" type="alerEvents:Extraction"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="ExtractionSubsequentNotify" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:ExtractionSubsequentNotify"/>
+            <xs:complexType name="ExtractionSubsequentNotify">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="extraction" type="alerEvents:Extraction"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="RelatedAssetRegister" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:RelatedAssetRegister"/>
+            <xs:complexType name="RelatedAssetRegister">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="originalAsset" type="alerEvents:Asset"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="relatedAsset" type="alerEvents:Asset"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="relation" type="alerEvents:Relationship"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="MetaDataChanged" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:MetaDataChanged"/>
+            <xs:complexType name="MetaDataChanged">
+                <complexContent>
+                    <extension base="alerEvents:MultiUse">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="submittedBy" type="alerEvents:User"/>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="subscribedBy" type="alerEvents:User"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="RegistrationStatusChanged" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:RegistrationStatusChanged"/>
+            <xs:complexType name="RegistrationStatusChanged">
+                <complexContent>
+                    <extension base="alerEvents:MultiUse"/>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="CategorizationChanged" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:CategorizationStatusChanged"/>
+            <xs:complexType name="CategorizationStatusChanged">
+                <complexContent>
+                    <extension base="alerEvents:MultiUse"/>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="PolicyAssertionChanged" substitutionGroup="commonEvents:ExtendedData"
+                 type="alerEvents:PolicyAssertionChanged"/>
+            <xs:complexType name="PolicyAssertionChanged">
+                <complexContent>
+                    <extension base="alerEvents:MultiUse"/>
+                </complexContent>
+            </xs:complexType>
+            <xs:element name="MultiUse" substitutionGroup="commonEvents:ExtendedData" type="alerEvents:MultiUse"/>
+            <xs:complexType name="MultiUse">
+                <complexContent>
+                    <extension base="commonEvents:ExtendedData">
+                        <sequence>
+                            <xs:element maxOccurs="1" minOccurs="1" name="asset" type="alerEvents:Asset"/>
+                            <xs:element maxOccurs="1" minOccurs="1" name="type" type="xs:string"/>
+                            <xs:element maxOccurs="unbounded" minOccurs="1" name="parameters" type="alerEvents:MultiUseParam"/>
+                        </sequence>
+                    </extension>
+                </complexContent>
+            </xs:complexType>
+            <xs:complexType name="MultiUseParam">
+                <xs:annotation>
+                    <xs:documentation>Defines the name value pairs for multi use event</xs:documentation>
+                </xs:annotation>
+                <xs:sequence>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="1" name="value" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="Asset">
+                <xs:annotation>
+                    <xs:documentation>Defines the asset information</xs:documentation>
+                </xs:annotation>
+                <xs:sequence>
+                    <xs:element name="id" type="xs:long"/>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="version" type="xs:string"/>
+                    <xs:element name="description" type="xs:string"/>
+                    <xs:element name="typeID" type="xs:long"/>
+                    <xs:element name="activeStatus">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="ACTIVE"/>
+                                <xs:enumeration value="INACTIVE"/>
+                                <xs:enumeration value="RETIRED"/>
+                                <xs:enumeration value="DELETED"/>
+                                <xs:enumeration value="INCOMPLETE"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="producingProjectsId" type="xs:long"/>
+                    <xs:element maxOccurs="1" minOccurs="0" name="community" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="User">
+                <xs:annotation>
+                    <xs:documentation>Defines the user information</xs:documentation>
+                </xs:annotation>
+                <xs:sequence>
+                    <xs:element name="id" type="xs:long"/>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="firstName" type="xs:string"/>
+                    <xs:element name="lastName" type="xs:string"/>
+                    <xs:element name="emailAddress" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="Extraction">
+                <xs:annotation>
+                    <xs:documentation>Defines the extraction information</xs:documentation>
+                </xs:annotation>
+                <xs:sequence>
+                    <xs:element name="id" type="xs:long"/>
+                    <xs:element name="asset" type="alerEvents:Asset"/>
+                    <xs:element name="user" type="alerEvents:User"/>
+                    <xs:element name="projectName" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="Relationship">
+                <xs:annotation>
+                    <xs:documentation>Defines the relation between two assets</xs:documentation>
+                </xs:annotation>
+                <xs:sequence>
+                    <xs:element name="id" type="xs:long"/>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="entityType" type="xs:string"/>
+                    <xs:element name="direction" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema targetNamespace="http://www.bea.com/aler/events/wsdl/elements" xmlns:commonEvents="http://www.bea.com/infra/events"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2001/XMLSchema"
+             elementFormDefault="qualified" attributeFormDefault="unqualified"/>
+        <xsd:schema targetNamespace="http://www.bea.com/infra/events/workflow/status">
+            <xsd:simpleType name="InstanceStatusEnumeration">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="RUNNING"/>
+                    <xsd:enumeration value="EXCEPTION"/>
+                    <xsd:enumeration value="SUSPENDED"/>
+                    <xsd:enumeration value="GRABBED"/>
+                    <xsd:enumeration value="COMPLETED"/>
+                    <xsd:enumeration value="ABORTED"/>
+                    <xsd:enumeration value="ACTIVITY_COMPLETED"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="newEventRequestResponseRequest">
+        <wsdl:part name="event" element="ns:newEventRequestResponse"/>
+    </wsdl:message>
+    <wsdl:message name="newEventRequestResponseResponse">
+        <wsdl:part name="status" element="ns:StringVal"/>
+    </wsdl:message>
+    <wsdl:message name="newEventRequestResponseStringRequest">
+        <wsdl:part name="event" element="ns:newEventRequestResponseString"/>
+    </wsdl:message>
+    <wsdl:message name="newEventRequestResponseStringResponse">
+        <wsdl:part name="status" element="ns:StringVal"/>
+    </wsdl:message>
+    <wsdl:portType name="eventPortType">
+        <wsdl:operation name="newEventRequestResponse">
+            <wsdl:input message="tns:newEventRequestResponseRequest"/>
+            <wsdl:output message="tns:newEventRequestResponseResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="newEventRequestResponseString">
+            <wsdl:input message="tns:newEventRequestResponseStringRequest"/>
+            <wsdl:output message="tns:newEventRequestResponseStringResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="EventServiceBinding" type="tns:eventPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="newEventRequestResponse">
+            <soap:operation soapAction="http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponse"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="newEventRequestResponseString">
+            <soap:operation soapAction="http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponseString"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="eventService">
+        <wsdl:port name="EventServiceBindingPort" binding="tns:EventServiceBinding">
+            <soap:address location="http://localhost:7001/OEREventHandler-EventHandler-context-root/EventServiceBindingPort"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
