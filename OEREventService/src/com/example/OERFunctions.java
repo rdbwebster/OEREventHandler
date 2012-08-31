@@ -28,102 +28,83 @@ public class OERFunctions {
     public OERFunctions() {
         super();
     }
-    private static AuthToken authenticationToken;
-    private static FlashlineRegistry alerInstance = null;
 
 
-
-    public  String test(String repoURL, String username, String password, long assetID) 
-               {
-                       
-                       StringBuffer value = new StringBuffer(10);
-                       
-                       try {
-                       
-                               if(repoURL.length() == 0)
-                                       System.out.println("Error: a repository url is required.  For example: http://localhost:7101/aler/services/FlashlineRegistry");
-                               
-                               
-                               if(username.length() == 0)
-                                       System.out.println("Error: a repository userid id is required.    For example: admin");
-                                       
-                               if(password.length() == 0)
-                               
-                                       System.out.println("Error: a repository password id is required.  For example: admin");
-                                             
-                       
-                               connect(repoURL, username, password);
-                           
-                               Asset asset = alerInstance.assetRead(authenticationToken, assetID);
-                               
-                               System.out.println("Connected to OER and read Asset " +  asset.getDisplayName());
-                           
+    public  String readAsset(String repoURL, String username, String password, long assetID) 
+   {
+           
+           try {
+                   // Connect to repository
+                   // Servlet Based Web Service, method must be thread safe 
+                   URL alerRepURL  = new URL(repoURL);
+                   FlashlineRegistry repoInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
+                   AuthToken authToken = repoInstance.authTokenCreate(username, password);
+                                                       
+                   System.out.println("Connected to Repository : " + repoURL);       
                
-                       }
-                       catch(OpenAPIException lEx) {
-                               System.out.println("ServerCode = "+ lEx.getServerErrorCode());
-                               System.out.println("Message = "+ lEx.getMessage());
-                               System.out.println("StackTrace:");
-                               lEx.printStackTrace();
-                               }
-                       catch (RemoteException lEx) {
-                               lEx.printStackTrace();
-                       } 
+                   Asset asset = repoInstance.assetRead(authToken, assetID);
                    
-                           
-                       catch(Exception ex)
-                       {               
-                               System.out.println("Exception " + ex.getMessage());
-                           
-                       }
+                   System.out.println("Connected to OER and read Asset " +  asset.getDisplayName());
+               
+                   repoInstance.authTokenDelete(authToken);
+               
+   
+           }
+           catch(OpenAPIException lEx) {
+                   System.out.println("ServerCode = "+ lEx.getServerErrorCode());
+                   System.out.println("Message = "+ lEx.getMessage());
+                   System.out.println("StackTrace:");
+                   lEx.printStackTrace(System.out);
+                   }
+           catch (RemoteException lEx) {
+               System.out.println("OER Functions: Caught Remote Exception  " + lEx.getMessage());
+               lEx.printStackTrace(System.out);
+           } 
+           
+           catch(Exception ex)
+           {               
+               System.out.println("OER Functions caught Exception: " + ex.getMessage());  
+               ex.printStackTrace(System.out);
+           }
 
-                       return "";
-               }
+           return "";
+        }
 
-       private void search(String repoURL, String userName, String password) {
+
+
+       private void search(String repoURL, String username, String password, String searchString) {
            
          
            try {
-           
-                   if(repoURL.length() == 0)
-                           System.out.println("Error: a repository url is required.  For example: http://localhost:7101/aler/services/FlashlineRegistry");
-                   
-                   
-                   if(userName.length() == 0)
-                           System.out.println("Error: a repository userid id is required.    For example: admin");
-                           
-                   if(password.length() == 0)
-                   
-                           System.out.println("Error: a repository password id is required.  For example: admin");
-                                 
-           
-                    connect(repoURL, userName, password);
+               // Connect to repository
+               // Servlet Based Web Service, method must be thread safe 
+               URL alerRepURL  = new URL(repoURL);
+               FlashlineRegistry repoInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
+               AuthToken authToken = repoInstance.authTokenCreate(username, password);                                    
+               System.out.println("Connected to Repository : " + repoURL);          
+                    
+               AssetCriteria criteria = new AssetCriteria();
+               SearchTerm lSearchTerm = new SearchTerm();
+               lSearchTerm.setKey("name");
+               lSearchTerm.setOperator("LIKE");
+               lSearchTerm.setValue(searchString);
+               SearchTerm[] lTerms = new SearchTerm[1];
+               lTerms[0] = lSearchTerm;
+               criteria.setSearchTerms(lTerms);
+               AssetSummary[]  assets = repoInstance.assetQuerySummary(authToken, criteria);
                
-                    AssetCriteria criteria = new AssetCriteria();
-                    AssetSummary[] assets = alerInstance.assetQuerySummary(authenticationToken, criteria);
-               
-                    criteria = new AssetCriteria();
-                    SearchTerm lSearchTerm = new SearchTerm();
-                    lSearchTerm.setKey("name");
-                    lSearchTerm.setOperator("LIKE");
-                    lSearchTerm.setValue("Department");
-                    SearchTerm[] lTerms = new SearchTerm[1];
-                    lTerms[0] = lSearchTerm;
-                    criteria.setSearchTerms(lTerms);
-                    assets = alerInstance.assetQuerySummary(authenticationToken, criteria);
-                   
-                   for(int i=0; i< assets.length; i++)
-                   {
-                        System.out.println("Connected to OER and searched for Asset " +  assets[i].getName());
-                        if(assets[i].getName().equals("{http://departmentdetailsservice/v2}Service/DepartmentFinderService")) {
-                           
-                           Asset asset = alerInstance.assetRead(authenticationToken, assets[i].getID());
-                           asset.setVersion("3.0");
-                           alerInstance.assetUpdate(authenticationToken, asset);
-                       }
+               for(int i=0; i< assets.length; i++)
+               {
+                    System.out.println("Connected to OER and searched for Asset " +  assets[i].getName());
+                    if(assets[i].getName().equals("{http://departmentdetailsservice/v2}Service/DepartmentFinderService")) {
+                       
+                       Asset asset = repoInstance.assetRead(authToken, assets[i].getID());
+                       asset.setVersion("3.0");
+                       repoInstance.assetUpdate(authToken, asset);
                    }
+               }
                
-         //      alerInstance.notificationCreate(authenticationToken, arg1, arg2, arg3);
+               repoInstance.authTokenDelete(authToken);
                
            
            }
@@ -131,47 +112,25 @@ public class OERFunctions {
                    System.out.println("ServerCode = "+ lEx.getServerErrorCode());
                    System.out.println("Message = "+ lEx.getMessage());
                    System.out.println("StackTrace:");
-                   lEx.printStackTrace();
+                   lEx.printStackTrace(System.out);
                    } 
+           
            catch (RemoteException lEx) {
-                   lEx.printStackTrace();
+                       System.out.println("OER Functions: Caught Remote Exception  " + lEx.getMessage());
+                       lEx.printStackTrace(System.out);
                    } 
                   
                
            catch(Exception ex)
            {               
-                   System.out.println("Exception " + ex.getMessage());
-               
+               System.out.println("OER Functions caught Exception: " + ex.getMessage());  
+               ex.printStackTrace(System.out);
            }
 
            return;
        }
        
-       private void connect(String repoURL, String userName, String password)  
-                                                                                               
-               {
-                       
-                       try{
-                               if (alerInstance == null)
-                               {
-                                       URL alerRepURL  = new URL(repoURL);
-                       
-                                       alerInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
-                       
-                                       authenticationToken = alerInstance.authTokenCreate(userName, password);
-                                       System.out.println("Connected to Repository : " + repoURL);
-                               }
-                               else
-                                       System.out.println("Connected to Repository : " + repoURL +       " using existing connection.");
-                       }
-                       catch(Exception ox)
-                       {               
-                            System.out.println("Exception connecting to Repository " + ox.getMessage());
- 
-                        }   
-                       
-                       return;
-               }
+      
        
     // This Uses an Asset, apparently the only way to create a survey.
     // Survey can be seen My Stuff, Consumed Assets
@@ -183,18 +142,12 @@ public class OERFunctions {
             String templateId = "usage_query_1";
             
             try {
-            
-                    if(repoURL.length() == 0)
-                            System.out.println("Error: a repository url is required.  For example: http://localhost:7101/aler/services/FlashlineRegistry");
-                    
-                    
-                    if(username.length() == 0)
-                            System.out.println("Error: a repository userid id is required.    For example: admin");
-                            
-                    if(password.length() == 0)
-                            System.out.println("Error: a repository password id is required.  For example: admin");
-                                         
-                    connect(repoURL, username, password);
+                    // Connect to repository
+                    // Servlet Based Web Service, method must be thread safe 
+                    URL alerRepURL  = new URL(repoURL);
+                    FlashlineRegistry repoInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
+                    AuthToken authToken = repoInstance.authTokenCreate(username, password);                         
+                    System.out.println("Connected to Repository : " + repoURL);          
                 
                 
                     long ASSET_ID_1 = 50006;     // must be a valid, registered asset id in OER, see Asset Editor for ID
@@ -204,9 +157,11 @@ public class OERFunctions {
                     // Create a new extraction
                     long[] lAssetIDs = { ASSET_ID_1 };
                     ExtractionDownload[] extractionDownloads =
-                    alerInstance.extractionCreate(authenticationToken, PROJECT_ID, lAssetIDs);
+                    repoInstance.extractionCreate(authToken, PROJECT_ID, lAssetIDs);
                     System.out.println("Number of new extraction downloads created: " +
                     extractionDownloads.length);
+                
+                    repoInstance.authTokenDelete(authToken);
                 
                   
             }
@@ -214,17 +169,18 @@ public class OERFunctions {
                     System.out.println("ServerCode = "+ lEx.getServerErrorCode());
                     System.out.println("Message = "+ lEx.getMessage());
                     System.out.println("StackTrace:");
-                    lEx.printStackTrace();
+                    lEx.printStackTrace(System.out);
                     }
                 
             catch (RemoteException lEx) {
-                    System.out.println("Caught Remote Exception " + lEx.getMessage());
-                    lEx.printStackTrace();
+                    System.out.println("OER Functions: Caught Remote Exception  " + lEx.getMessage());
+                    lEx.printStackTrace(System.out);
             } 
         
                 
             catch(Exception ex) {               
-                    System.out.println("Caught Exception " + ex.getMessage());   
+                System.out.println("OER Functions caught Exception: " + ex.getMessage());  
+                ex.printStackTrace(System.out);
             }
             
             
@@ -232,110 +188,95 @@ public class OERFunctions {
             return "";
     }
     
-    public  String notify(String repoURL, String username, String password, String[] recipients) 
-               {
-                       
-                       StringBuffer value = new StringBuffer(10);
-                       String templateId = "asset_registered";
-                       String templateId2 = "extraction_email_initial";
-
-                       
-                       try {
-                       
-                               if(repoURL.length() == 0)
-                                       System.out.println("Error: a repository url is required.  For example: http://localhost:7101/aler/services/FlashlineRegistry");
-                               
-                               
-                               if(username.length() == 0)
-                                       System.out.println("Error: a repository userid id is required.    For example: admin");
-                                       
-                               if(password.length() == 0)
-                                       System.out.println("Error: a repository password id is required.  For example: admin");
-                                                    
-                               connect(repoURL, username, password);
-                           
-                           
-                               // read the existing substitutions based on the given template
-                               String[] lSubstitutions = alerInstance.notificationSubstitutionsRead(authenticationToken, templateId);
-                               
-                               
-                               // create an array of namevalue pairs; a namevalue pair for each required substitution
-                               NameValue[] lNameValues = new NameValue[lSubstitutions.length];
-                                
-                            
-                               // populate the namevalues
-                               for(int i=0; i<lSubstitutions.length; i++) {
-                                lNameValues[i] = new NameValue();
-                                lNameValues[i].setName(lSubstitutions[i]);
-                                if(lSubstitutions[i].equals("registrar.email"))
-                                    lNameValues[i].setValue("admin@soabpm-server");
-                                else 
-                                    if(lSubstitutions[i].equals("asset.name"))
-                                        lNameValues[i].setValue("{namespace}SuperDepartment/v1");
-                                    else
-                                        lNameValues[i].setValue("valueof-"+"notset");
-                                System.out.println("valueof-"+lSubstitutions[i]);
-                               }
-                               
-                               // Create the Notification
-                               // Creates an entry in OER SMTPQUEUE Table
-                               // OER Web App will send email through configured SMTP Server,
-                               // This example shows how to create a notification in addition 
-                               // to the normal notifications the OER Web app creates for example as tabs are approved.
-                               // A running BPM Server is not required for emails to be generated and sent.
-                               alerInstance.notificationCreate(authenticationToken, templateId, recipients, lNameValues);
-                         
-                       //    SystemSettingsCriteria lCriteria = new SystemSettingsCriteria();
-                          //     lCriteria.setNameCriteria("enterprise.defaults.displayname.field");
-                     //          SettingValue[] lValues = alerInstance.systemSettingsQuery(authenticationToken, lCriteria);
-                      //         for (int i=0;i<lValues.length;i++) {
-                       //          SettingValue lValue = lValues[i];
-                        //         System.out.println("Setting Name: " + lValue.getDescriptor().getName());
-                         //        System.out.println("Setting Value: " + lValue.getValue());
-                            //   }
+    public  String notify(String repoURL, String username, String password, String[] recipients, String assetName) 
+       {
                
-                       }
-                       catch(OpenAPIException lEx) {
-                               System.out.println("ServerCode = "+ lEx.getServerErrorCode());
-                               System.out.println("Message = "+ lEx.getMessage());
-                               System.out.println("StackTrace:");
-                               lEx.printStackTrace();
-                               }
+             
+               String templateId = "asset_registered";
+            //  String templateId2 = "extraction_email_initial";
+
+               
+               try {
+                      // Connect to repository
+                      // Servlet Based Web Service, method must be thread safe 
+                       URL alerRepURL  = new URL(repoURL);
+                       FlashlineRegistry repoInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
+                       AuthToken authToken = repoInstance.authTokenCreate(username, password);                         
+                       System.out.println("Connected to Repository : " + repoURL);          
                            
-                       catch (RemoteException lEx) {
-                               System.out.println("Caught Remote Exception " + lEx.getMessage());
-                               lEx.printStackTrace();
-                       } 
                    
-                           
-                       catch(Exception ex) {               
-                               System.out.println("Caught Exception " + ex.getMessage());   
+                       // read the existing substitutions based on the given template
+                       String[] lSubstitutions = repoInstance.notificationSubstitutionsRead(authToken, templateId);
+                       
+                       
+                       // create an array of namevalue pairs; a namevalue pair for each required substitution
+                       NameValue[] lNameValues = new NameValue[lSubstitutions.length];
+                        
+                    
+                       // populate the namevalues
+                       for(int i=0; i<lSubstitutions.length; i++) {
+                        lNameValues[i] = new NameValue();
+                        lNameValues[i].setName(lSubstitutions[i]);
+                        if(lSubstitutions[i].equals("registrar.email"))
+                            lNameValues[i].setValue("admin@soabpm-server");
+                        else 
+                            if(lSubstitutions[i].equals("asset.name"))
+                                lNameValues[i].setValue(assetName);
+                            else
+                                lNameValues[i].setValue("valueof-"+"notset");
+                        System.out.println("valueof-"+lSubstitutions[i]);
                        }
                        
-                       
-                
-                       return "";
+                       // Create the OER Notification
+                       // This creates an entry in OER SMTPQUEUE Table
+                       // OER Web App will send an email through configured SMTP Server,
+                       // This example shows how to trigger a notification in addition 
+                       // to the normal notifications the OER Web app creates for example as tabs are approved.
+                       // A running BPM Server is not required for emails to be generated and sent.
+                       // Email sends are visible in the cmee.log
+                       repoInstance.notificationCreate(authToken, templateId, recipients, lNameValues);
+                   
+                       repoInstance.authTokenDelete(authToken);
+                  
                }
-   
+               catch(OpenAPIException lEx) {
+                       System.out.println("ServerCode = "+ lEx.getServerErrorCode());
+                       System.out.println("Message = "+ lEx.getMessage());
+                       System.out.println("StackTrace:");
+                       lEx.printStackTrace(System.out);
+                       }
+                   
+               catch (RemoteException lEx) {
+                       System.out.println("OER Functions: Caught Remote Exception " + lEx.getMessage());
+                       lEx.printStackTrace(System.out);
+               } 
+           
+                   
+               catch(Exception ex) {               
+                       System.out.println("OER Functions caught Exception: " + ex.getMessage());  
+                       ex.printStackTrace(System.out);
+               }    
+        
+               return "";
+       }
+
     
+    // Can be run from command line as simple unit test
     public static void main(String Args[]) {
     
         OERFunctions obj = new OERFunctions();
         
         // Read Asset Example
-        //obj.test("http://localhost:7102/oer/services/FlashlineRegistry", "admin", "welcome1", 567);
+        //obj.readAsset("http://localhost:7102/oer/services/FlashlineRegistry", "admin", "welcome1", 567);
         
         // Search Example
-        //obj.search("http://localhost:7102/oer/services/FlashlineRegistry", "admin", "welcome1");
+        //obj.search("http://localhost:7102/oer/services/FlashlineRegistry", "admin", "welcome1", "department");
         
         // Notify Example
         String[] users = new String[1];
         users[0] = "architect@soabpm-server";
-          
- 
-       
              
-    //    obj.notify("http://localhost:7102/oer/services/FlashlineRegistry", "admin", "welcome1", users);
+    //    obj.notify("http://localhost:7102/oer/services/FlashlineRegistry", "admin", "welcome1", users, "Asset123");
         obj.useForSurvey("http://localhost:7102/oer/services/FlashlineRegistry", "admin", "welcome1", users);
        
     }

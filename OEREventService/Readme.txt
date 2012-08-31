@@ -59,17 +59,23 @@ Edit EventPortTypeImpl.java
 
 Add a few lines to newEventRequestResponse as shown below
 
-        
-         public String newEventRequestResponse(@WebParam(name = "newEventRequestResponse", partName = "event", targetNamespace = "http://www.bea.com/infra/events")
+        public String newEventRequestResponse(@WebParam(name = "newEventRequestResponse", partName = "event", targetNamespace = "http://www.bea.com/infra/events")
         Event event) {
         if(event == null)
             System.out.println("OER_CUSTOM_EVENT_HANDLER ERROR event is null");
         else {
             System.out.println("OER_CUSTOM_EVENT_HANDLER received new event " + event.getEventData().getName());
         }
+        OERFunctions funcs = new OERFunctions();
+        // "v2_1.G+NTr3az8thaGGJBn0vwPg=="
+        if(event.getEventData().getName().equals("urn:com:bea:aler:events:type:AssetTabApproved"))
+        {
+            String recipients[] =  { "architect@soabpm-server" };
+            
+            funcs.notify(repoURL, username, password, recipients, event.getEventData().getName());
+        }
         return "Success";
     }
-
             
     
 Then Build in JDeveloper, and right click on Project and Deploy to Admin Server.
@@ -120,18 +126,22 @@ Edit the EndPointEventSubscription.xml file in the deploy OER application (stage
 
 
 Change host, port and uri
+ <sub:endPoint name="ALBPMEndpoint">
 
-<!--The host of the Webservice Endpoint -->
+                        <!--The host of the Webservice Endpoint -->
                         <sub:host>localhost</sub:host>
+                        
                         <!--The port of the Webservice Endpoint -->
-                        <sub:port>6001</sub:port>
+                        <sub:port>4001</sub:port>
+                        
                         <!--The URI of the Webservice Endpoint -->
                         <!--If you are using ALBPM5.7 uncomment the following line and comment the line after -->
                         <!-- <sub:uri>fuegoServices/ws/StatusChangeEndpointServiceListener</sub:uri> -->
                         <sub:uri>OEREvents-OEREventService-context-root/eventService</sub:uri>
                         
-Change Operation to 
-			newEventRequestResponse
+                        <!--Unless a custom WSDL Contract is used, the namepsace should not be changed -->
+                        <sub:targetNamespace>http://www.bea.com/infra/events</sub:targetNamespace>
+
 
 
 Restart OER managed server
