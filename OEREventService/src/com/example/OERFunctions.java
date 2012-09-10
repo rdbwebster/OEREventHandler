@@ -24,10 +24,18 @@ import javax.jws.WebMethod;
 import javax.xml.rpc.ServiceException;
 
 
+
+//
+//  This class is no longer needed, its functionality is now
+//  divided into the different classes in com.example.eventhandlers
+//
+//
+
 public class OERFunctions {
     public OERFunctions() {
         super();
     }
+
 
 
     public  String readAsset(String repoURL, String username, String password, long assetID) 
