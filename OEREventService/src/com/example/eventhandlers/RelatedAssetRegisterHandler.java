@@ -13,11 +13,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public class AssetRegisteredHandler implements EventHandler {
+public class RelatedAssetRegisterHandler implements EventHandler {
         
-    private Log logger = LogFactory.getLog(AssetRegisteredHandler.class.getName()); // not static since contained in servlet
+    private Log logger = LogFactory.getLog(RelatedAssetRegisterHandler.class.getName()); // not static since contained in servlet
     
-        public AssetRegisteredHandler() {
+        public RelatedAssetRegisterHandler() {
             super();
             
         }
