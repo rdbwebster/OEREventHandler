@@ -100,33 +100,38 @@ public class EventPortTypeImpl {
       
         if(eventHandlerClass!= null) {
             
-            ConnectionPool.OERConnection conn = null;
-            
             try {
-              Class c = Class.forName(eventHandlerClass);  // Dynamically load the class
-              EventHandler  handler = (EventHandler) c.newInstance();            // Dynamically instantiate it
+                 Class c = Class.forName(eventHandlerClass);  // Dynamically load the class
+                 EventHandler  handler = (EventHandler) c.newInstance();            // Dynamically instantiate it
                 
-              // Invoke the handler to process the event
-              
-              conn = pool.getInstance();
-              logger.info("Retrieved connection from OER connection pool: " + conn.getConnection().hashCode() + " : " +
+                 // Invoke the handler to process the event
+                 ConnectionPool.OERConnection conn = null;
+                 try {
+                            
+                            conn = pool.getInstance();
+                            logger.info("Retrieved connection from OER connection pool: " + 
+                                        conn.getConnection().hashCode() + " : " +
                             conn.getAuthToken().getToken());
-                
-              handler.process(event, properties, conn);
-              pool.release(conn);  
+                            handler.process(event, properties, conn);
+                            pool.release(conn);  
+                 }
+                 catch (Exception any)
+                 {
+                            logger.error("Handler returned an Exception, returning pooled connection ", any);
+                            if(conn != null)
+                                pool.release(conn);  
+                 }
                 
             } 
-            
             catch (Exception e) { 
-                if(conn != null)
-                    pool.release(conn);  // bug might release twice?
-                logger.error("Could not locate the configured Event Handler class named " + 
+                logger.error("Could not load class configured Event Handler class named " + 
                                    String.valueOf(eventHandlerClass) + " set in property " + eventNameProperty);
                 }
         }
         else 
                 logger.warn("Ignoring Event " + event.getEventData().getName() + 
-                                 " no definition found for event in the AutomationConfig.properties file.");
+                                 " no definition found for event in the AutomationConfig.properties file." +
+                            event.getEventData().toString());
     
         
         return "Success";

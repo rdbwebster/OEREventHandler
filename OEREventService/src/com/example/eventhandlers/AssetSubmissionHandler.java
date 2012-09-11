@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 public class AssetSubmissionHandler implements EventHandler {
     
     private Log logger = LogFactory.getLog(AssetSubmissionHandler.class.getName()); // not static since contained in servlet
+    public static final String ASSET_ACCEPTOR = "event.AssetSubmission.acceptor";
     
     public AssetSubmissionHandler() {
         super();
@@ -35,18 +36,10 @@ public class AssetSubmissionHandler implements EventHandler {
     public void process(Event event, Properties props, ConnectionPool.OERConnection conn) {
         
         try {
-                String repoURL  = props.getProperty("oer.uri");
-                String username = props.getProperty("oer.username"); 
-                String password = props.getProperty("oer.password");
-            
-                // Connect to repository
-                // Servlet Based Web Service, method must be thread safe 
-                URL alerRepURL  = new URL(repoURL);
-                FlashlineRegistry repoInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
-                AuthToken authToken = repoInstance.authTokenCreate(username, password);
-                                                    
-                logger.info("Connected to Repository : " + repoURL);       
-      
+             
+                FlashlineRegistry repoInstance = conn.getConnection();
+                AuthToken authToken = conn.getAuthToken();
+                                                      
                 // Get The Extended Data of known subtype
             
                 JAXBElement<AssetSubmission> assetSubJ =  (JAXBElement<AssetSubmission>) event.getExtendedData();
@@ -59,53 +52,15 @@ public class AssetSubmissionHandler implements EventHandler {
                 
                 // Accept the Asset
             
-                String acceptor = props.getProperty("event.AssetSubmission.acceptor");  
+                String acceptor = props.getProperty(ASSET_ACCEPTOR);  
                 repoInstance.assetAccept(authToken, asset.getID());
                 asset.setAcceptedByName(acceptor);
                 asset.setAcceptedDate(cal);
                 logger.info("Asset " + asset.getDisplayName()  + " Accepted by " + acceptor );
             
-                // Assign the Asset to the specified user
-                String assignee = props.getProperty("event.AssetSubmission.assignee");  
-               
-                // Lookup the user
-                UserCriteria lCriteria = new UserCriteria();
-                lCriteria.setNameCriteria(assignee);
-                RegistryUser[] users = repoInstance.userQuery(authToken, lCriteria);
-            
-                // No such user ?
-                if(users.length == 1)
-                {    
-                    logger.info("Located User " + users[0].getUserName() + " id " + users[0].getID()); 
-                    
-                    // if assigning to one user
-                    asset.setAssigned(true);
-                    asset.setAssignedToID(users[0].getID());
-                    asset.setAssignedDate(cal);
-                   
-               //     AssignedUser[] assignedUsers = new AssignedUser[1];
-               //     AssignedUser user = new AssignedUser();
-               //     user.setID(users[0].getID());
-               //     user.setAssignedDate(cal);
-               //     assignedUsers[0] = user;
-                    
-               //     asset.setAssignedUsers(assignedUsers);
-                   
-                    logger.info("Assigned Asset " + asset.getLongName() +
-                                 " to User " + assignee); 
-
-                } 
-                    else  logger.error("Unable to Assign Asset " + asset.getLongName() +
-                                       " to User " + assignee  + " User does not exist in Repository"); 
-
-            
                 // Update the Asset
                 repoInstance.assetUpdate(authToken, asset);
             
-                
-                // Email the assigned user
-        
-                repoInstance.authTokenDelete(authToken);
             
         
         }
