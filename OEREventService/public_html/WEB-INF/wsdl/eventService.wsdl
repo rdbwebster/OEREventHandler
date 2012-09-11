@@ -429,35 +429,16 @@
     <wsdl:message name="newEventRequestResponseResponse">
         <wsdl:part name="status" element="ns:StringVal"/>
     </wsdl:message>
-    <wsdl:message name="newEventRequestResponseStringRequest">
-        <wsdl:part name="event" element="ns:newEventRequestResponseString"/>
-    </wsdl:message>
-    <wsdl:message name="newEventRequestResponseStringResponse">
-        <wsdl:part name="status" element="ns:StringVal"/>
-    </wsdl:message>
     <wsdl:portType name="eventPortType">
         <wsdl:operation name="newEventRequestResponse">
             <wsdl:input message="tns:newEventRequestResponseRequest"/>
             <wsdl:output message="tns:newEventRequestResponseResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="newEventRequestResponseString">
-            <wsdl:input message="tns:newEventRequestResponseStringRequest"/>
-            <wsdl:output message="tns:newEventRequestResponseStringResponse"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="EventServiceBinding" type="tns:eventPortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="newEventRequestResponse">
             <soap:operation soapAction="http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponse"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="newEventRequestResponseString">
-            <soap:operation soapAction="http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponseString"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>

@@ -1,4 +1,7 @@
 This Web App is an example of a Custom OER Event Listener Web Service
+OER is configured to send events to this web service when certain actions are completed in the OER web interface.
+This web service then calls back into the OER using its REX interface to configure Assets etc based on the desired
+processing for the received event.
 
 http://docs.oracle.com/cd/E23943_01/admin.1111/e16580/oerwf.htm#CJHJADDE
 
@@ -6,7 +9,8 @@ Contrary to docs I found EventListener.WSDL in
 /u02/app/oracle/middleware/user_projects/domains/soa_domain/servers/gov_server1/stage/oer_11/oer_11.1.1.5.0/oer-app/WEB-INF/lib
 /modules.eventing-11.1.1.5.0.jar
 
-WSDL Issues
+The WSDL included with OER for custom web services has a number of issues.
+** It is abstract,
 ** Edit the WSDL and add service Tag to WSDL before definitions close tag
 
             <wsdl:service name="eventService">
@@ -22,9 +26,11 @@ Other issues
 ** If a method is Document Literal there can be only one part
    May violations for some methods.
    
-So Maybe WSDL is not Doc Literal, or mixed RPC and Document style/
 
-I modified so it has just methods I need and added a element for String so type String is not needed.
+Modify the wsdl so it contains only the 'newEventRequestResponse' operation.
+See the eventService.wsdl file
+
+
 
 
 
@@ -42,7 +48,7 @@ Business Tier-> Web Services-> Java Web Service From WSDL
 
 In Wizard
 Choose Java EE 1.5 with support for JAX-WS RI
-Browse and select modified WSDL   file:/home/oracle/Desktop/gen/EventsListenerMod.wsdl
+Browse and select modified WSDL   file: .../eventService.wsdl
 Leave Java selected
 Leave Add Service Endpoint Interface UNselected
 Leave Copy WSDL Locally selected
@@ -54,28 +60,21 @@ Press Next and Finish
 (Code Generation may take up to 1 minute)
 
 
-Edit EventPortTypeImpl.java
----------------------------
+Edit EventPortTypeImpl.java 
+ - add code to implement a strategy pattern.
+   The event received from OER is looked up in EventHandlerConfig.properties file
+   The configured Java handler class for the event is loaded dynamically and invoked.
+ - add logging
 
-Add a few lines to newEventRequestResponse as shown below
+Add a com.example.eventhandlers folder
+Create a concrete handler class that implements the EventHandler interface for each type 
+of event the web service will process.
+The classes in this folder will be loaded and invoked by the EventPortTypeImpl class to handle an event.
 
-        public String newEventRequestResponse(@WebParam(name = "newEventRequestResponse", partName = "event", targetNamespace = "http://www.bea.com/infra/events")
-        Event event) {
-        if(event == null)
-            System.out.println("OER_CUSTOM_EVENT_HANDLER ERROR event is null");
-        else {
-            System.out.println("OER_CUSTOM_EVENT_HANDLER received new event " + event.getEventData().getName());
-        }
-        OERFunctions funcs = new OERFunctions();
-        // "v2_1.G+NTr3az8thaGGJBn0vwPg=="
-        if(event.getEventData().getName().equals("urn:com:bea:aler:events:type:AssetTabApproved"))
-        {
-            String recipients[] =  { "architect@soabpm-server" };
-            
-            funcs.notify(repoURL, username, password, recipients, event.getEventData().getName());
-        }
-        return "Success";
-    }
+Add EventHandlerConfig.properties file
+Add commons-logging.properties file
+
+
             
     
 Then Build in JDeveloper, and right click on Project and Deploy to Admin Server.
@@ -106,8 +105,8 @@ Deploy Successful
          </S:Envelope>
        
 
-Enable OER Event Manager
-===========================
+Configure OER to the Enable OER Event Manager
+========================================
 Login to OER as Admin
 
 in OER Admin System Settings Tab
@@ -117,12 +116,12 @@ then press save button.
 
 
 
-Configure EndPointEventSubscription.xml file
-============================================
+Configure OER to call this web Service when events are raised in OER
+====================================================================
 
 Edit the EndPointEventSubscription.xml file in the deploy OER application (stage directory)
+for example
 /u02/app/oracle/middleware/user_projects/domains/soa_domain/servers/gov_server1/stage/oer_11/oer_11.1.1.5.0/oer-app/WEB-INF/classes/
-
 
 
 Change host, port and uri
@@ -144,22 +143,25 @@ Change host, port and uri
 
 
 
-Restart OER managed server
+Restart the Weblogic Service hosting OER
 
-then monitor Event Log File
+then monitor Event Log File for event traffic, using tail -f or some other method
 
-	$domain_home/cmee.log  
+	$wls_domain_home/cmee.log  
 
-for event traffic.
 
 Test through OER
 ================
 Search for Asset in OER then open in Asset Editor and approve some tab.
 
-Should see event dispatched in cmee.log
+A dispatched event should be visible in cmee.log
 
-EventHandler Service should write entry to AdminServer.log file
-(Sure stdout to log is enabled for server in wls console)
+The EventService should log the received event to the Server.log file of the WLS
+server hosting the web service.
+
+(The Service uses Apache commons logging, directed to the WLS Log implementation).
+(Check the WLS console to ensure the log level for the server is set to INFO or DEBUG)
+
 
 ####<Aug 28, 2012 12:26:18 PM PDT> <Notice> <Stdout> <soabpm-server> <AdminServer> 
 <[ACTIVE] ExecuteThread: '12' for queue: 'weblogic.kernel.Default (self-tuning)'> 

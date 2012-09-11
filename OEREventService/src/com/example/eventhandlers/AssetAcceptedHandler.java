@@ -1,12 +1,12 @@
 package com.example.eventhandlers;
 
+import com.example.ConnectionPool;
 import com.example.types.AssetAccepted;
 import com.example.types.Event;
 import com.flashline.registry.openapi.base.OpenAPIException;
 import com.flashline.registry.openapi.entity.Asset;
 import com.flashline.registry.openapi.entity.AuthToken;
 import com.flashline.registry.openapi.service.v300.FlashlineRegistry;
-import com.flashline.registry.openapi.service.v300.FlashlineRegistryServiceLocator;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Properties;
@@ -29,7 +29,7 @@ public class AssetAcceptedHandler implements EventHandler {
         //
         */
         
-        public void process(Event event, Properties props) {
+        public void process(Event event, Properties props, ConnectionPool.OERConnection conn) {
             
             
             // Get The Extended Data from the Event
@@ -51,8 +51,10 @@ public class AssetAcceptedHandler implements EventHandler {
                         // Connect to repository
                         // Servlet Based Web Service, method must be thread safe 
                         URL alerRepURL  = new URL(repoURL);
-                        FlashlineRegistry repoInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
-                        AuthToken authToken = repoInstance.authTokenCreate(username, password);
+                  //      FlashlineRegistry repoInstance = new FlashlineRegistryServiceLocator().getFlashlineRegistry(alerRepURL);
+                  //      AuthToken authToken = repoInstance.authTokenCreate(username, password);
+                        FlashlineRegistry repoInstance = conn.getConnection();
+                        AuthToken authToken = conn.getAuthToken();
                                                             
                         logger.info("Connected to Repository : " + repoURL);       
               
@@ -62,17 +64,31 @@ public class AssetAcceptedHandler implements EventHandler {
                         Asset asset = repoInstance.assetRead(authToken, assetAccepted.getAsset().getId());
                     
                         // get the namespace
-                        String namespace = asset.getLongName().substring(1, asset.getLongName().lastIndexOf('}'));
-                        logger.info("Asset Name contains Namespace " + namespace);
-                        String versionid = namespace.substring(namespace.lastIndexOf('/') + 2);    // skip v prefix eg v1
-                        logger.info("Asset Name contains versionid " + versionid);
-                        
-                        // set the namespace and update the asset
-                        asset.setVersion(versionid);
-                        repoInstance.assetUpdate(authToken, asset);
-                            
-                        logger.info("Connected to OER, set Version on Accepted Service Asset " +  asset.getDisplayName());
-                        
+                        int offset1 = asset.getLongName().lastIndexOf('}');
+                        if(offset1 == -1)
+                        {
+                            logger.error("Unable to determine namespace for Asset " + asset + " namespace. " +
+                                         "Version Metadata will not be set");
+                        }
+                        else{
+                            String namespace = asset.getLongName().substring(1, offset1);
+                            logger.info("Asset Name contains Namespace " + namespace);
+                            int offset2 = asset.getLongName().lastIndexOf('/');
+                            if(offset2 == -1)
+                            {
+                                logger.error("Unable to determine Version id from Asset " + asset + " namespace. " +
+                                             "Version Metadata will not be set");
+                            }
+                            else {
+                                String versionid = namespace.substring(offset2+ 2);    // skip v prefix eg v1
+                                logger.info("Asset Name contains versionid " + versionid);
+                                // set the namespace and update the asset
+                                asset.setVersion(versionid);
+                                repoInstance.assetUpdate(authToken, asset);
+                                logger.info("Connected to OER, set Version on Accepted Service Asset " +  asset.getDisplayName());
+                            }
+                        } 
+                         
                         repoInstance.authTokenDelete(authToken);
                     }
                     
@@ -81,19 +97,18 @@ public class AssetAcceptedHandler implements EventHandler {
                 catch(OpenAPIException lEx) {
                         logger.error("ServerCode = "+ lEx.getServerErrorCode());
                         logger.error("Message = "+ lEx.getMessage());
-                        logger.error("StackTrace:");
-                        lEx.printStackTrace(System.out); 
+                        logger.error("StackTrace:", lEx);
+                       
                         }
                 
-                catch (RemoteException lEx) {
-                    System.out.println("OER Functions: Caught Remote Exception  " + lEx.getMessage());
-                    lEx.printStackTrace(System.out);
+                catch (RemoteException rEx) {
+                    logger.error("OER Functions: Caught Remote Exception", rEx);
+
                 } 
                 
                 catch(Exception ex)
                 {               
-                    System.out.println("OER Functions caught Exception: " + ex.getMessage());  
-                    ex.printStackTrace(System.out);
+                    logger.error("OER Functions caught Exception: ", ex);  
                 }
         }
        }

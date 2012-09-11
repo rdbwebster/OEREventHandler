@@ -3,7 +3,6 @@ package com.example;
 import com.example.eventhandlers.EventHandler;
 import com.example.types.Event;
 import com.example.types.ObjectFactory;
-import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory; 
@@ -22,7 +21,9 @@ import javax.xml.ws.Action;
 public class EventPortTypeImpl {
 
     public static final String EVENT_PROPERTY_PREFIX = "event";
+    public static final String EVENT_PROPERTIES = "EventHandlerConfig.properties";
     private Properties properties;
+    private ConnectionPool pool;
     private Log logger = LogFactory.getLog(EventPortTypeImpl.class);   // not static since contained in servlet
     
     @PostConstruct
@@ -35,14 +36,33 @@ public class EventPortTypeImpl {
         
                 properties = new Properties() ;
                // Place property file in WEB-INF/classes
-                properties.load(classLoader.getResourceAsStream("/EventHandlerConfig.properties"));
-            
+                properties.load(classLoader.getResourceAsStream("/" + EVENT_PROPERTIES));
+           
+                String repoURL  = properties.getProperty("oer.uri");
+                String username = properties.getProperty("oer.username"); 
+                String password = properties.getProperty("oer.password");
+                String numConnections = properties.getProperty("oer.numberOfConnections");
+                
+                pool = new ConnectionPool(Integer.parseInt(numConnections));
+                pool.initialize(repoURL, username, password);
+               
          }
-        catch(Exception ex)
-        {
-            logger.error("Failed to read AutomationConfig.properties");
-            ex.printStackTrace(System.out);
+     
+      
+        catch(java.io.IOException ex) {
+            logger.error("Failed to read " + EVENT_PROPERTIES, ex);
+         
         }
+        
+        catch(NumberFormatException nex) {
+            logger.error("Invalid value for property oer.numberOfConnections, value should be an integer.");
+           
+        }
+        
+        catch (Exception lEx) {
+            logger.error("ConnectionPool failed to initial connections.", lEx);
+           
+        } 
     }
         
     public EventPortTypeImpl() { 
@@ -80,15 +100,26 @@ public class EventPortTypeImpl {
       
         if(eventHandlerClass!= null) {
             
+            ConnectionPool.OERConnection conn = null;
+            
             try {
               Class c = Class.forName(eventHandlerClass);  // Dynamically load the class
               EventHandler  handler = (EventHandler) c.newInstance();            // Dynamically instantiate it
                 
               // Invoke the handler to process the event
-              handler.process(event, properties);
+              
+              conn = pool.getInstance();
+              logger.info("Retrieved connection from OER connection pool: " + conn.getConnection().hashCode() + " : " +
+                            conn.getAuthToken().getToken());
+                
+              handler.process(event, properties, conn);
+              pool.release(conn);  
+                
             } 
             
             catch (Exception e) { 
+                if(conn != null)
+                    pool.release(conn);  // bug might release twice?
                 logger.error("Could not locate the configured Event Handler class named " + 
                                    String.valueOf(eventHandlerClass) + " set in property " + eventNameProperty);
                 }
@@ -101,16 +132,5 @@ public class EventPortTypeImpl {
         return "Success";
     }
 
-
-    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
-    @Action(input = "http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponseString", output = "http://www.bea.com/aler/events/eventsListenerWsdl/eventPortType/newEventRequestResponseStringResponse")
-    @WebMethod(action = "http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponseString")
-    @WebResult(name = "StringVal", targetNamespace = "http://www.bea.com/infra/events", partName = "status")
-    public String newEventRequestResponseString(@WebParam(name = "newEventRequestResponseString", partName = "event", targetNamespace = "http://www.bea.com/infra/events")
-        String event) {
-        
-        // Not implemented
-        return null;
-    }
     
 }

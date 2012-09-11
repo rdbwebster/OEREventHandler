@@ -1,5 +1,6 @@
 package com.example.eventhandlers;
 
+import com.example.ConnectionPool;
 import com.example.types.AssetRegistered;
 import com.example.types.Event;
 import com.flashline.registry.openapi.base.OpenAPIException;
@@ -31,7 +32,7 @@ public class AssetRegisteredHandler implements EventHandler {
         //
         */
         
-        public void process(Event event, Properties props) {
+        public void process(Event event, Properties props, ConnectionPool.OERConnection conn) {
             
             
             // Get The Extended Data from the Event
@@ -79,28 +80,29 @@ public class AssetRegisteredHandler implements EventHandler {
                         }
 
                     
-                        System.out.println("Connected to OER, and auto registered assets related to newly registered service " +  asset.getDisplayName());
+                        logger.info("Connected to OER, and auto registered assets related to newly registered service " +  asset.getDisplayName());
                     
                         repoInstance.authTokenDelete(authToken);
                     
                 
                 }
                 catch(OpenAPIException lEx) {
-                        System.out.println("ServerCode = "+ lEx.getServerErrorCode());
-                        System.out.println("Message = "+ lEx.getMessage());
-                        System.out.println("StackTrace:");
-                        lEx.printStackTrace(System.out);
+                        logger.error("ServerCode = "+ lEx.getServerErrorCode());
+                        logger.error("Message = "+ lEx.getMessage());
+                        logger.error("StackTrace:", lEx);
+                      
+                      
                         }
                 
-                catch (RemoteException lEx) {
-                    System.out.println("OER Functions: Caught Remote Exception  " + lEx.getMessage());
-                    lEx.printStackTrace(System.out);
+                catch (RemoteException rEx) {
+                    logger.error("OER Functions: Caught Remote Exception  ", rEx);
+                  
                 } 
                 
                 catch(Exception ex)
                 {               
-                    System.out.println("OER Functions caught Exception: " + ex.getMessage());  
-                    ex.printStackTrace(System.out);
+                    logger.error("OER Functions caught Exception: ", ex);  
+                   
                 }
             }
         }
