@@ -57,13 +57,10 @@ public class AssetAcceptedHandler implements EventHandler {
         AssetAccepted assetAccepted = assetAccJ.getValue();
 
         try {
-            FlashlineRegistry repoInstance = conn.getConnection();
-            AuthToken authToken = conn.getAuthToken();
 
             // Retrieve the submitted Asset
 
-            Asset asset =
-                repoInstance.assetRead(authToken, assetAccepted.getAsset().getId());
+            Asset asset = conn.getConnection().assetRead(conn.getAuthToken(), assetAccepted.getAsset().getId());
 
             //
             // Assign the Asset to the specified user
@@ -74,7 +71,7 @@ public class AssetAcceptedHandler implements EventHandler {
             UserCriteria lCriteria = new UserCriteria();
             lCriteria.setNameCriteria(assignee);
             RegistryUser[] users =
-                repoInstance.userQuery(authToken, lCriteria);
+                conn.getConnection().userQuery(conn.getAuthToken(), lCriteria);
 
             // No such user ?
             if (users.length == 1) {
@@ -139,7 +136,7 @@ public class AssetAcceptedHandler implements EventHandler {
                 }
 
                 // Update the Asset
-                repoInstance.assetUpdate(authToken, asset);
+                conn.getConnection().assetUpdate(conn.getAuthToken(), asset);
 
             }
         } catch (OpenAPIException lEx) {

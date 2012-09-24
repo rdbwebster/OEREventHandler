@@ -7,6 +7,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory; 
 import javax.annotation.PostConstruct;
+
+import javax.jws.HandlerChain;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
@@ -15,9 +17,46 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.ws.Action;
 
+/*
+ * Event Service Implementation
+ * 
+ * This service implements the OER Custom Event Service wsdl
+ * OER can be configured to send all internal events triggered by changes to 
+ * repository metadata to this service.
+ * This Service employs a set of custom event handler classes, one per event type.
+ * Each custom handler is a comcrete implementation of the EventHandler interface.
+ * 
+ * When a event is received from the OER dispatch client, the service consults 
+ * the EventHandlerConfig.properties file to determine which class in the 
+ * com.example.eventhandlers package is configured to handle the event.
+ * The custom handler class is dynamically loaded and the event is dispatched to the handler.
+ * The handler class uses the OER REX API to call back to OER and perform the desired
+ * changes to Asset meta data.
+ * 
+ * This EventPortTypeImpl class relies on the ConnectionPool class to handle
+ * a pool of connections to OER.
+ * An existing connection from the pool is passed to the Handler.
+ * Connection pooling is necessary because without it, a new http Session is initiated
+ * in the OER server for each callback to OER.
+ * 
+ * The EventHandlerConfig.properties file contains a section for each event handler.
+ * The property file is read by this class and all properties are passed to the handler.
+ * This allows all handlers to share entries in a single property file.
+ * 
+ * Logging is implemented using Apache Commons.
+ * To change Logging level add the value com.example=Debug
+ * to the WLS Console 'Server->Logging->Logger Server Properties' field
+ * The commons-logging.properties config is set to send log entries to the WebLogic Server log file.
+ * 
+ * The Service also registers a SOAP Interceptor which will output the SOAP Request
+ * including the OER Event message when logging is set to the debug level.
+ * 
+*/
+
 @WebService(name = "eventPortType", targetNamespace = "http://www.bea.com/aler/events/eventsListenerWsdl/", serviceName = "eventService", portName = "EventServiceBindingPort", wsdlLocation = "WEB-INF/wsdl/eventService.wsdl")
 @XmlSeeAlso( { ObjectFactory.class })
 @SOAPBinding(style = SOAPBinding.Style.DOCUMENT, parameterStyle = SOAPBinding.ParameterStyle.BARE)
+@HandlerChain(file = "HandlerChain.xml")
 public class EventPortTypeImpl {
 
     public static final String EVENT_PROPERTY_PREFIX = "event";
@@ -71,7 +110,11 @@ public class EventPortTypeImpl {
      
     }
     
-    
+    /*
+     * Handles an event message sent by OER.
+     * This operation is called by the Event Dispatcher Client containen
+     * in Oracle Enterprise Repository.
+     */
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponse", output = "http://www.bea.com/aler/events/eventsListenerWsdl/eventPortType/newEventRequestResponseResponse")
     @WebMethod(action = "http://www.bea.com/aler/events/eventsListenerWsdl/newEventRequestResponse")
@@ -80,9 +123,9 @@ public class EventPortTypeImpl {
         Event event) {
             
         if(event == null)
-            logger.error("OER_CUSTOM_EVENT_HANDLER ERROR event is null");
+            logger.error("ERROR event sent by OER is null");
         else {
-            System.out.println("OER_CUSTOM_EVENT_HANDLER received new event " + event.getEventData().getName());
+            System.out.println("Received new event " + event.getEventData().getName());
             logger.info("Received new event " + event.getEventData().getName());
                
         }
@@ -92,8 +135,7 @@ public class EventPortTypeImpl {
                 event.getEventData().getName().substring(event.getEventData().getName().lastIndexOf(':') + 1);
         
         //
-        // load the
-        // configured handler for this event
+        // load the configured handler for this event
         //
         
         String eventHandlerClass  = properties.getProperty(eventNameProperty);

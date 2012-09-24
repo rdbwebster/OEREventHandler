@@ -29,58 +29,29 @@ public class RelatedAssetRegisterHandler implements EventHandler {
         */
         
         public void process(Event event, Properties props, ConnectionPool.OERConnection conn) {
-            
-            
+              
             // Get The Extended Data from the Event
             
-          //  JAXBElement<AssetRegistered> assetRegJ =  (JAXBElement<AssetRegistered>) event.getExtendedData();
-         //   AssetRegistered assetRegistered = assetRegJ.getValue();
             JAXBElement<RelatedAssetRegister> assetReg =  (JAXBElement<RelatedAssetRegister>) event.getExtendedData();
             RelatedAssetRegister relatedAssetEvent = assetReg.getValue();
         
-            // Is the Accepted Asset a Service Asset?
+            // Is the Registered Asset a Service Asset?
             
-      //     if(relatedAssetEvent.getRelatedAsset().getTypeID() == 154)
-        //    {
+            if(relatedAssetEvent.getOriginalAsset().getTypeID() == 154)
+            {
             
                 try {
                       
-                        FlashlineRegistry repoInstance = conn.getConnection();
-                        AuthToken authToken = conn.getAuthToken();
-                           
+                        
+                        long id = relatedAssetEvent.getRelatedAsset().getId(); 
+                    
                         // Register the related Asset
                     
-                        long id = relatedAssetEvent.getRelatedAsset().getId(); 
-                        repoInstance.assetRegister(authToken, id);
+                        conn.getConnection().assetRegister(conn.getAuthToken(), id);
                         logger.info("Auto Registered " + relatedAssetEvent.getRelatedAsset().getName()  +
                                     " related to newly registered asset " + relatedAssetEvent.getOriginalAsset().getName());
                      
-                       // Register related Assets
-                    
-                        // Retrieve and walk its related Assets
-                  //      RelationshipType[] allRelationshipTypes = asset.getRelationshipTypes();
-                  //      for (int i = 0; i < allRelationshipTypes.length; i++) {
-                  //          System.out.println("Found "+ allRelationshipTypes[i].getName() +" relationship");
-                            
-                  //          if (allRelationshipTypes[i].getName().equals("Contains Interface")) {
-                  //              RelationshipType myRelationshipType = allRelationshipTypes[i];
-                   //             long[] secondaryIDs = myRelationshipType.getSecondaryIDs();
-                    //            Asset interfaceAsset = repoInstance.assetRead(authToken, secondaryIDs[0]);
-                                // Update the Asset
-                   //             repoInstance.assetUpdate(authToken, interfaceAsset);
-                   //             logger.info("Auto Registered Asset " + interfaceAsset.getLongName());
-                   //         }
-                   //         else if (allRelationshipTypes[i].getName().equals("Deployed To")) {
-                   //             RelationshipType myRelationshipType = allRelationshipTypes[i];
-                   //             long[] secondaryIDs = myRelationshipType.getSecondaryIDs();
-                    //            Asset portAsset = repoInstance.assetRead(authToken, secondaryIDs[0]);
-                                // Update the Asset
-                  //              repoInstance.assetUpdate(authToken, portAsset);
-                  //              logger.info("Auto Registered Asset " + portAsset.getLongName());
-        
-                      //      }
-                   //     }
-                    
+                  
                        
                         // Update the Asset
                         //repoInstance.assetUpdate(authToken, asset);
@@ -99,7 +70,7 @@ public class RelatedAssetRegisterHandler implements EventHandler {
                 catch(Exception ex) {               
                         logger.error("Caught Exception: ", ex);  
                 }
-          //  }
+            }
         }
 
 }

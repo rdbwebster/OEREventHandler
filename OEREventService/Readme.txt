@@ -37,18 +37,19 @@ See the eventService.wsdl file
 
 
 
-Create New App In JDeveloper
+Create a New Application In JDeveloper
 ============================
 
+From the JDeveloper main menu select
 Application->New Generic Application   'OEREvents'
 With New Generic Project               'OEREventService'
 
-Right click on EventHandler project and choose 
+Right click on OEREventService project and choose 
 Business Tier-> Web Services-> Java Web Service From WSDL
 
 In Wizard
 Choose Java EE 1.5 with support for JAX-WS RI
-Browse and select modified WSDL   file: .../eventService.wsdl
+Browse and select modified WSDL as discussed above.
 Leave Java selected
 Leave Add Service Endpoint Interface UNselected
 Leave Copy WSDL Locally selected
@@ -61,10 +62,13 @@ Press Next and Finish
 
 
 Edit EventPortTypeImpl.java 
- - add code to implement a strategy pattern.
+ - Add code to implement the Service implementation.
+   The supplied code uses a strategy pattern to dispatch each event to a specialized Handler class.
    The event received from OER is looked up in EventHandlerConfig.properties file
    The configured Java handler class for the event is loaded dynamically and invoked.
- - add logging
+ -  
+The service utilizes the Apache commons logging. 
+The included property file is set to add the service log entries to the WebLogic Server log file.
 
 Add a com.example.eventhandlers folder
 Create a concrete handler class that implements the EventHandler interface for each type 

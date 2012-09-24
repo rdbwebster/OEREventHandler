@@ -43,8 +43,6 @@ public class AssetSubmissionHandler implements EventHandler {
         
         try {
              
-                FlashlineRegistry repoInstance = conn.getConnection();
-                AuthToken authToken = conn.getAuthToken();
                                                       
                 // Get The Extended Data of known subtype
             
@@ -53,19 +51,19 @@ public class AssetSubmissionHandler implements EventHandler {
             
                 // Retrieve the submitted Asset
                 
-                Asset asset = repoInstance.assetRead(authToken, assetSub.getAsset().getId());
+                Asset asset = conn.getConnection().assetRead(conn.getAuthToken(), assetSub.getAsset().getId());
                 Calendar cal = Calendar.getInstance();
                 
                 // Accept the Asset
             
                 String acceptor = props.getProperty(ASSET_ACCEPTOR);  
-                repoInstance.assetAccept(authToken, asset.getID());
+                conn.getConnection().assetAccept(conn.getAuthToken(), asset.getID());
                 asset.setAcceptedByName(acceptor);
                 asset.setAcceptedDate(cal);
                 logger.info("Asset " + asset.getDisplayName()  + " Accepted by " + acceptor );
             
                 // Update the Asset
-                repoInstance.assetUpdate(authToken, asset);
+                conn.getConnection().assetUpdate(conn.getAuthToken(), asset);
         
         }
         catch(OpenAPIException aEx) {
