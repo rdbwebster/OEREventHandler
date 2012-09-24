@@ -18,7 +18,13 @@ import javax.xml.bind.JAXBElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
+/*
+ * This Handler responds to the AssetSubmission OER event.
+ * The Hanlder accepts the submitted Asset using the OER user name
+ * specified by the event.AssetSubmission.acceptor property.
+ * 
+ * 
+ */
 public class AssetSubmissionHandler implements EventHandler {
     
     private Log logger = LogFactory.getLog(AssetSubmissionHandler.class.getName()); // not static since contained in servlet
@@ -60,8 +66,6 @@ public class AssetSubmissionHandler implements EventHandler {
             
                 // Update the Asset
                 repoInstance.assetUpdate(authToken, asset);
-            
-            
         
         }
         catch(OpenAPIException aEx) {
@@ -72,13 +76,13 @@ public class AssetSubmissionHandler implements EventHandler {
                 }
         
         catch (RemoteException lEx) {
-            logger.error("OER Functions: Caught Remote Exception  ",  lEx);
+            logger.error("Remote Exception  ",  lEx);
           
         } 
         
         catch(Exception ex)
         {               
-            logger.error("OER Functions caught Exception: " , ex);  
+            logger.error("Exception: " , ex);  
           
         }
     }
