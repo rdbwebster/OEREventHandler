@@ -12,27 +12,28 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 /*
- * This simple SOAPHandler will output the contents of incoming
- * and outgoing messages.
+ * A simple SOAPHandler that logs the contents of SOAP request and response
+ * to a commons log com.example.ConnectionPool
+ *  
+ * @author Bob Webster
  */
 public class SOAPLoggingHandler implements SOAPHandler<SOAPMessageContext> {
-   
    
     private Log logger = null;  // not static since contained in servlet
     
     public SOAPLoggingHandler() {
-   
       logger = LogFactory.getLog(ConnectionPool.class);
-    
     }
 
+    /*
+     * Not Implemented
+     */ 
     public Set<QName> getHeaders() {
         return null;
     }
 
     public boolean handleMessage(SOAPMessageContext smc) {
-        logToSystemOut(smc);
-        logger.debug("Handle MESSAGE");
+        logOut(smc);
         return true;
     }
 
@@ -45,14 +46,14 @@ public class SOAPLoggingHandler implements SOAPHandler<SOAPMessageContext> {
     public void close(MessageContext messageContext) {
     }
 
-    /*
-     * Check the MESSAGE_OUTBOUND_PROPERTY in the context
-     * to see if this is an outgoing or incoming message.
-     * Write a brief message to the print stream and
-     * output the message. The writeTo() method can throw
-     * SOAPException or IOException
-     */
-    private void logToSystemOut(SOAPMessageContext smc) {
+   /*
+    * Check the MESSAGE_OUTBOUND_PROPERTY in the context
+    * to see if this is an outgoing or incoming message.
+    * Write a brief message to the print stream and
+    * output the message. The writeTo() method can throw
+    * SOAPException or IOException
+    */
+    private void logOut(SOAPMessageContext smc) {
         Boolean outboundProperty = (Boolean)
             smc.get (MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
@@ -69,8 +70,8 @@ public class SOAPLoggingHandler implements SOAPHandler<SOAPMessageContext> {
           
             message.writeTo(ps);
          
-            logger.debug(baos.toString("ISO-8859-1")); // e.g. ISO-8859-1
-            logger.debug("");     // just to add a newline
+            logger.debug(baos.toString("ISO-8859-1")); 
+            logger.debug("");     // add a newline
        
             ps.close();
             baos.close();

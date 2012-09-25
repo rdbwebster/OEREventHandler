@@ -5,12 +5,6 @@ import com.example.types.AssetSubmission;
 import com.example.types.Event;
 import com.flashline.registry.openapi.base.OpenAPIException;
 import com.flashline.registry.openapi.entity.Asset;
-import com.flashline.registry.openapi.entity.AuthToken;
-import com.flashline.registry.openapi.entity.RegistryUser;
-import com.flashline.registry.openapi.query.UserCriteria;
-import com.flashline.registry.openapi.service.v300.FlashlineRegistry;
-import com.flashline.registry.openapi.service.v300.FlashlineRegistryServiceLocator;
-import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.Properties;
@@ -19,11 +13,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /*
- * This Handler responds to the AssetSubmission OER event.
- * The Hanlder accepts the submitted Asset using the OER user name
+ * A Handler for the OER AssetSubmission event.
+ * This handler is called after an Asset Has been submitted to OER.
+ * The Handler accepts the submitted Asset using the OER user name
  * specified by the event.AssetSubmission.acceptor property.
+ * The Handler instantiated and called by Custom OER Event Service
  * 
- * 
+ * @author Bob Webster
  */
 public class AssetSubmissionHandler implements EventHandler {
     
@@ -39,6 +35,14 @@ public class AssetSubmissionHandler implements EventHandler {
     // Auto Accept new Assets Submitted to the Repository
     // Auto Assign them to the configured user
     //
+    /*
+    * Performs processing for the OER AssetSubmission Event 
+    * Auto Accept new Assets Submitted to the Repository
+    * Auto Assign the Asset to the user defined by the event.AssetSubmission.acceptor property
+    * @param event (required)  - An OER Event Object
+    * @param props (required)  - Properties that support the implementation of this handler
+    * @param conn  (required)  - An active OER connection object
+    */ 
     public void process(Event event, Properties props, ConnectionPool.OERConnection conn) {
         
         try {

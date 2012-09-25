@@ -3,39 +3,35 @@ package com.example.eventhandlers;
 import com.example.ConnectionPool;
 import com.example.types.AssetAccepted;
 import com.example.types.Event;
-
 import com.flashline.registry.openapi.base.OpenAPIException;
 import com.flashline.registry.openapi.entity.Asset;
 import com.flashline.registry.openapi.entity.AssignedUser;
-import com.flashline.registry.openapi.entity.AuthToken;
 import com.flashline.registry.openapi.entity.RegistryUser;
 import com.flashline.registry.openapi.query.UserCriteria;
-import com.flashline.registry.openapi.service.v300.FlashlineRegistry;
-
 import java.rmi.RemoteException;
-
 import java.util.Calendar;
 import java.util.Properties;
-
 import javax.xml.bind.JAXBElement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /*
- * This Handler responds to the AssetAccepted OER event.
- * The Hanlder assigns the Asset to the OER user name
- * specified by the event.AssetSubmission.acceptor property.
- * If the Asset is a Service, set the Version metadata attribute
- * by incrementing the version id at the end of the namespace.
+ * A Handler for an AssetAccepted OER event.
+ * This handler is called after an Asset has been submitted to OER and Accepted by the registrar.
+ * The handler assigns the accepted Asset to a OER user 
+ * specified by the event.AssetAccepted.assignee property.
+ * If the Asset is a Service, the handler also sets the value of
+ * the Version metadata attribute to the version value at the end of the namepsace.
+ * The Handler instantiated and called by Custom OER Event Service
+ * 
+ * @author Bob Webster
  *
  */
 
 
 public class AssetAcceptedHandler implements EventHandler {
 
-    private Log logger =
-        LogFactory.getLog(AssetAcceptedHandler.class.getName()); // not static since contained in servlet
+    private Log logger = LogFactory.getLog(AssetAcceptedHandler.class.getName()); // not static since contained in servlet
     public static final String ASSET_ASSIGNEE = "event.AssetAccepted.assignee";
     public static final long SERVICE_TYPE = 154;
 
@@ -44,8 +40,12 @@ public class AssetAcceptedHandler implements EventHandler {
     }
 
     /*
-    //  If the asset accepted is a Service, set the Version Attribute  based on the suffix of the Service Namespace
-    */
+    * Performs processing for the OER AssetAccepted Event 
+    * If the asset accepted is a Service, set the Version Attribute  based on the suffix of the Service Namespace
+    * @param event (required)  - An OER Event Object
+    * @param props (required)  - Properties that support the implementation of this handler
+    * @param conn  (required)  - An active OER connection object
+    */ 
 
     public void process(Event event, Properties props,
                         ConnectionPool.OERConnection conn) {
